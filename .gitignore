@@ -1,0 +1,25 @@
+# Mac Junk
+*.DS_Store
+
+# built application files - but allow the main apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/classes/
+bin/res/
+bin/*.cache
+gen/
+lint.xml
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Eclipse project files
+.classpath
+.project
