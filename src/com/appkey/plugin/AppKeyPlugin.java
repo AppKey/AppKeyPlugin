@@ -26,12 +26,14 @@ public class AppKeyPlugin {
         return mINSTANCE;
     }
     
-    public void checkAccess(Activity activity, String AppID, boolean analyticsEnabled) {
-        if (LOGD) Log.d(TAG+".checkAccess", "Called with AppID="+AppID+", analyticsEnabled="+analyticsEnabled);
-        checkAccessWithWizard(activity,AppID,analyticsEnabled,"","");
+    public void checkAccess(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics) {
+    	LOGD=debugLogging;
+        if (LOGD) Log.d(TAG+".checkAccess", "Called with AppID="+AppID+", analyticsEnabled="+userAnalytics);
+        checkAccessWithWizard(activity, AppID, debugLogging, userAnalytics,"","");
     }
     
-    public void checkAccessWithWizard(Activity activity, String AppID, boolean analyticsEnabled, String premiumContentDescription, String premiumAppURL) {
+    public void checkAccessWithWizard(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics, String premiumContentDescription, String premiumAppURL) {
+    	LOGD=debugLogging;
         if (LOGD) Log.d(TAG+".checkAccessWithWizard", "Called with AppID="+AppID+", premiumContentDescription="+premiumContentDescription+", premiumAppURL="+premiumAppURL);
         if (premiumContentDescription==null) premiumContentDescription="";
         if (premiumAppURL==null) premiumAppURL="";
@@ -48,12 +50,12 @@ public class AppKeyPlugin {
         //The checker currently uses AsyncTask and needs to be run on the UI thread
         final Activity finalActivity = activity;
         final String finalAppID = AppID;
-        final boolean finalAnalyticsEnabled = analyticsEnabled;
+        final boolean finalAnalyticsEnabled = userAnalytics;
         Runnable runChecker=new Runnable() {
             @Override
             public void run() {
                 if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to instantiate AppKeyChecker");
-                AppKeyChecker akChecker = new AppKeyChecker(finalActivity, finalAppID, finalAnalyticsEnabled);
+                AppKeyChecker akChecker = new AppKeyChecker(finalActivity, finalAppID, LOGD, finalAnalyticsEnabled);
                 if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to call checkAccess");
                 akChecker.checkAccess(new AppKeyCallback(akChecker)); 
             }
@@ -98,7 +100,7 @@ public class AppKeyPlugin {
                     @Override
                     public void run() {
                         if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to call AppKeyWizard");
-                        new AppKeyWizard(mActivity, finalReason, mAppKeyChecker, mPremiumContentDescription, mPremiumAppURL);
+                        new AppKeyWizard(mActivity, finalReason, mAppKeyChecker, LOGD, mPremiumContentDescription, mPremiumAppURL);
                     }
                 };
                 if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to run Wizard on UI thread");

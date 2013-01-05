@@ -37,11 +37,13 @@ public class AppKeyWizard {
      * @param activity An activity
      * @param reason AppKeyCheckerCallback reason code
      * @param appKeyChecker reference to an instantiated AppKeyChecker object (needed for logging)
+     * @param debugLogging true enables detailed debugging LogCat logging
      * @param premiumContentDescription Text to describe the premium features AppKey users will receive in the calling App.  Will default to [PREMIUM FEATURES] if empty.
      * @param premiumAppUri Uri of a premium version of this app in your favorite appstore.  Use null if there is no premium version.
      */
-    public AppKeyWizard(Activity activity, int reason, AppKeyChecker appKeyChecker, String premiumContentDescription, String premiumAppUrl) {
-        if (LOGD) Log.d(TAG+".constructor", "Called with reason="+reason+", premiumContentDescription="+premiumContentDescription+", premiumAppUrl="+premiumAppUrl);
+    public AppKeyWizard(Activity activity, int reason, AppKeyChecker appKeyChecker, boolean debugLogging, String premiumContentDescription, String premiumAppUrl) {
+        LOGD=debugLogging;
+    	if (LOGD) Log.d(TAG+".constructor", "Called with reason="+reason+", premiumContentDescription="+premiumContentDescription+", premiumAppUrl="+premiumAppUrl);
         mActivity=activity;
         mAppKeyChecker=appKeyChecker;
         if (premiumContentDescription==null) premiumContentDescription="";
