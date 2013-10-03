@@ -14,9 +14,8 @@ public class AppKeyPlugin {
     private boolean LOGD=false;
     private static AppKeyPlugin mINSTANCE;
     private Activity mActivity;
-    private boolean mWizard;
+    private boolean mPromptUser;
     private String mPremiumContentDescription;
-    private String mPremiumAppURL;
 
     @SuppressWarnings("unused")
     private static AppKeyPlugin INSTANCE() {
@@ -29,22 +28,20 @@ public class AppKeyPlugin {
     public void checkAccess(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics) {
     	LOGD=debugLogging;
         if (LOGD) Log.d(TAG+".checkAccess", "Called with AppID="+AppID+", analyticsEnabled="+userAnalytics);
-        checkAccessWithWizard(activity, AppID, debugLogging, userAnalytics,"","");
+        checkAccessWithWizard(activity, AppID, debugLogging, userAnalytics,"");
     }
     
-    public void checkAccessWithWizard(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics, String premiumContentDescription, String premiumAppURL) {
+    public void checkAccessWithWizard(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics, String premiumContentDescription) {
     	LOGD=debugLogging;
-        if (LOGD) Log.d(TAG+".checkAccessWithWizard", "Called with AppID="+AppID+", premiumContentDescription="+premiumContentDescription+", premiumAppURL="+premiumAppURL);
+        if (LOGD) Log.d(TAG+".checkAccessWithWizard", "Called with AppID="+AppID+", premiumContentDescription="+premiumContentDescription);
         if (premiumContentDescription==null) premiumContentDescription="";
-        if (premiumAppURL==null) premiumAppURL="";
         
         if (premiumContentDescription=="") {
-            mWizard=false;
+            mPromptUser=false;
         } else {
-            mWizard=true;
+            mPromptUser=true;
             mActivity=activity;
             mPremiumContentDescription=premiumContentDescription;
-            mPremiumAppURL=premiumAppURL;
         }
         
         //The checker currently uses AsyncTask and needs to be run on the UI thread
@@ -55,7 +52,7 @@ public class AppKeyPlugin {
             @Override
             public void run() {
                 if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to instantiate AppKeyChecker");
-                AppKeyChecker akChecker = new AppKeyChecker(finalActivity, finalAppID, LOGD, finalAnalyticsEnabled);
+                AppKeyChecker akChecker = new AppKeyChecker(finalActivity, finalAppID, finalAnalyticsEnabled);
                 if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to call checkAccess");
                 akChecker.checkAccess(new AppKeyCallback(akChecker)); 
             }
@@ -91,19 +88,19 @@ public class AppKeyPlugin {
                     strReason="INACTIVE";
                     break;
             }
-            if (LOGD) Log.d("AppKeyPlugin.AppKeyCallback", "dontAllow() Called with reason="+strReason+", mWizard="+mWizard);
+            if (LOGD) Log.d("AppKeyPlugin.AppKeyCallback", "dontAllow() Called with reason="+strReason+", mWizard="+mPromptUser);
             UnityPlayer.UnitySendMessage("AppKeyManager", "dontAllow", strReason);
 
-            if (mWizard) {
+            if (mPromptUser) {
                 final int finalReason=reason;
                 Runnable runWizard=new Runnable() {
                     @Override
                     public void run() {
                         if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to call AppKeyWizard");
-                        new AppKeyWizard(mActivity, finalReason, mAppKeyChecker, LOGD, mPremiumContentDescription, mPremiumAppURL);
+                        mAppKeyChecker.promptUser(mActivity, finalReason, mPremiumContentDescription);
                     }
                 };
-                if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to run Wizard on UI thread");
+                if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to prompt user on UI thread");
                 mActivity.runOnUiThread(runWizard);
             }
         }
