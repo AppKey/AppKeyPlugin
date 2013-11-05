@@ -8,67 +8,53 @@ import com.unity3d.player.UnityPlayer;
 import android.app.Activity;
 import android.util.Log;
 
+/**
+ * AppKey plugin for Unity apps. Bridges the gap between the Unity-side AppKeyManager and the Java-based AppKey SDK.
+ * @author jimvitek
+ */
 public class AppKeyPlugin {
 
     private String TAG="AppKeyPlugin";
     private boolean LOGD=false;
     private static AppKeyPlugin mINSTANCE;
     private Activity mActivity;
-    private boolean mPromptUser;
-    private String mPremiumContentDescription;
+    private String mAppId="";
+    private boolean mAnalyticsEnabled;
+    private AppKeyChecker mAppKeyChecker=null;
 
     @SuppressWarnings("unused")
     private static AppKeyPlugin INSTANCE() {
         if (mINSTANCE == null) {
-            mINSTANCE=new AppKeyPlugin();
+            mINSTANCE=new AppKeyPlugin(); 
         }
         return mINSTANCE;
     }
     
-    public void checkAccess(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics) {
-    	LOGD=debugLogging;
-        if (LOGD) Log.d(TAG+".checkAccess", "Called with AppID="+AppID+", analyticsEnabled="+userAnalytics);
-        checkAccessWithWizard(activity, AppID, debugLogging, userAnalytics,"");
+    /**
+     * Initializes the plugin. Call this before calling any other functions on the plugin.
+     * @param activity an Activity
+     * @param appId The AppKey.com assigned app Id for your app
+     * @param analyticsEnabled Whether or not to track analytics for this app. Enables conversion funnel tracking.
+     */
+    public void init(Activity activity, String appId, boolean analyticsEnabled) {
+        mActivity=activity;
+        mAppId = appId;
+        mAnalyticsEnabled = analyticsEnabled;
+        mAppKeyChecker = new AppKeyChecker(activity, appId, analyticsEnabled);
     }
     
-    public void checkAccessWithWizard(Activity activity, String AppID, boolean debugLogging, boolean userAnalytics, String premiumContentDescription) {
-    	LOGD=debugLogging;
-        if (LOGD) Log.d(TAG+".checkAccessWithWizard", "Called with AppID="+AppID+", premiumContentDescription="+premiumContentDescription);
-        if (premiumContentDescription==null) premiumContentDescription="";
-        
-        if (premiumContentDescription=="") {
-            mPromptUser=false;
-        } else {
-            mPromptUser=true;
-            mActivity=activity;
-            mPremiumContentDescription=premiumContentDescription;
-        }
-        
-        //The checker currently uses AsyncTask and needs to be run on the UI thread
-        final Activity finalActivity = activity;
-        final String finalAppID = AppID;
-        final boolean finalAnalyticsEnabled = userAnalytics;
-        Runnable runChecker=new Runnable() {
-            @Override
-            public void run() {
-                if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to instantiate AppKeyChecker");
-                AppKeyChecker akChecker = new AppKeyChecker(finalActivity, finalAppID, finalAnalyticsEnabled);
-                if (LOGD) Log.d(TAG+".checkAccessWithWizard", "About to call checkAccess");
-                akChecker.checkAccess(new AppKeyCallback(akChecker)); 
-            }
-        };
-        if (LOGD) Log.d(TAG+".checkAccessWithWizard", "Running runnable to call SDK on UI thread");
-        activity.runOnUiThread(runChecker);
+    /**
+     * Check if user has AppKey fully enabled or not. Result will be communicated back to AppKeyManager.
+     */
+    public void checkAccess() {
+        if (LOGD) Log.d(TAG+".checkAccess", "Called with AppID="+mAppId+", analyticsEnabled="+mAnalyticsEnabled);
+
+        mAppKeyChecker.checkAccess(new AppKeyCallback()); 
     }
 
     class AppKeyCallback implements AppKeyCheckerCallback {
-        private AppKeyChecker mAppKeyChecker;
-        
-        public AppKeyCallback(AppKeyChecker appKeyChecker) {
-            mAppKeyChecker=appKeyChecker;
-        }
 
-        @Override
+    	@Override
         public void allow() { 
             if (LOGD) Log.d("AppKeyPlugin.AppKeyCallback", "allow() Called");
             UnityPlayer.UnitySendMessage("AppKeyManager", "allow", "");
@@ -88,21 +74,27 @@ public class AppKeyPlugin {
                     strReason="INACTIVE";
                     break;
             }
-            if (LOGD) Log.d("AppKeyPlugin.AppKeyCallback", "dontAllow() Called with reason="+strReason+", mWizard="+mPromptUser);
+            if (LOGD) Log.d("AppKeyPlugin.AppKeyCallback", "dontAllow() Called with reason="+strReason);
             UnityPlayer.UnitySendMessage("AppKeyManager", "dontAllow", strReason);
-
-            if (mPromptUser) {
-                final int finalReason=reason;
-                Runnable runWizard=new Runnable() {
-                    @Override
-                    public void run() {
-                        if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to call AppKeyWizard");
-                        mAppKeyChecker.promptUser(mActivity, finalReason, mPremiumContentDescription);
-                    }
-                };
-                if (LOGD) Log.d(TAG+".checkAccessWithWizard", "AppKeyCallback about to prompt user on UI thread");
-                mActivity.runOnUiThread(runWizard);
-            }
         }
+    }
+    
+    /**
+     * Prompt user to install and/or active AppKey. Actual prompt varies depending on device state.
+     * @param unlockedContentDescription
+     */
+    public void promptUser(String unlockedContentDescription) {
+        if (LOGD) Log.d(TAG+".promptUser", "Called with unlockedContentDescription="+unlockedContentDescription);
+
+        mAppKeyChecker.promptUser(mActivity, unlockedContentDescription); 
+    }
+
+    /**
+     * Open AppKey application for monetization & cross-promotional purposes.
+     */
+    public void openAppKey() {
+        if (LOGD) Log.d(TAG+".openAppKey", "Called");
+
+        mAppKeyChecker.openAppKey(); 
     }
 }
