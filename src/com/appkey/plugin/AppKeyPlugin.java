@@ -97,4 +97,13 @@ public class AppKeyPlugin {
 
         mAppKeyChecker.openAppKey(); 
     }
+
+    /**
+     * Sends debug-level logging entries to logcat
+     * @param enabled Whether or not to send debugging log entries to logcat
+     */
+    public void setDebugLogging(boolean enabled) {
+    	LOGD = enabled;
+    	mAppKeyChecker.setDebugLogging(enabled);
+    }
 }
