@@ -41,6 +41,7 @@ public class AppKeyPlugin {
         mAppId = appId;
         mAnalyticsEnabled = analyticsEnabled;
         mAppKeyChecker = new AppKeyChecker(activity, appId, analyticsEnabled);
+    	mAppKeyChecker.setDebugLogging(LOGD);
     }
     
     /**
@@ -99,11 +100,13 @@ public class AppKeyPlugin {
     }
 
     /**
-     * Sends debug-level logging entries to logcat
+     * Sends debug-level logging entries to logcat. Must be called after init() to impact the AppKeyChecker.
      * @param enabled Whether or not to send debugging log entries to logcat
      */
     public void setDebugLogging(boolean enabled) {
     	LOGD = enabled;
-    	mAppKeyChecker.setDebugLogging(enabled);
+    	if (mAppKeyChecker!=null) {
+        	mAppKeyChecker.setDebugLogging(enabled);
+    	}
     }
 }
