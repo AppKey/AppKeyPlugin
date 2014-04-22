@@ -17,7 +17,6 @@ public class AppKeyPlugin {
     private String TAG="AppKeyPlugin";
     private boolean LOGD=false;
     private static AppKeyPlugin mINSTANCE;
-    private Activity mActivity;
     private String mAppId="";
     private boolean mAnalyticsEnabled;
     private AppKeyChecker mAppKeyChecker=null;
@@ -37,7 +36,6 @@ public class AppKeyPlugin {
      * @param analyticsEnabled Whether or not to track analytics for this app. Enables conversion funnel tracking.
      */
     public void init(Activity activity, String appId, boolean analyticsEnabled) {
-        mActivity=activity;
         mAppId = appId;
         mAnalyticsEnabled = analyticsEnabled;
         mAppKeyChecker = new AppKeyChecker(activity, appId, analyticsEnabled);
@@ -82,12 +80,13 @@ public class AppKeyPlugin {
     
     /**
      * Prompt user to install and/or active AppKey. Actual prompt varies depending on device state.
-     * @param unlockedContentDescription
+     * @param activity an Activity
+     * @param akBenefit Description of benefit unlocked by AppKey
      */
-    public void promptUser(String unlockedContentDescription) {
-        if (LOGD) Log.d(TAG+".promptUser", "Called with unlockedContentDescription="+unlockedContentDescription);
+    public void promptUser(Activity activity, String akBenefit) {
+        if (LOGD) Log.d(TAG+".promptUser", "Called with benefit="+akBenefit);
 
-        mAppKeyChecker.promptUser(mActivity, unlockedContentDescription); 
+        mAppKeyChecker.promptUser(activity, akBenefit); 
     }
 
     /**
