@@ -1,10 +1,20 @@
 AppKeyPlugin
 
-Source code for an AppKey plugin for the Unity 3d environment.  This project wraps
+Source code for an AppKey plugin to the Unity 3d environment.  This project wraps
 the AppKeySDK and enables Unity developers to use it without the need to learn
 java android development.  This plugin produces a jar file that can be used directly in
-a Unity project, or by using the AppKeyPluginSample Unity project examples. We suggest you
-use the version that comes bundled with the AppKeyPlugin unity package. It combines
-this plugin with some Unity-side C# code to ease integration.
+a Unity project, or along with template code contained in the AppKeyPluginDemo project.
 
 As always, we're happy to help if you have any questions. support@appkey.com
+
+
+
+The MIT License (MIT)
+
+Copyright (c) 2014 AppKey Incorporated
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
